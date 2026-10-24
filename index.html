@@ -1,0 +1,902 @@
+<!DOCTYPE html> <html lang="en"> <head>
+<meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <meta name="theme-color" content="#4f46e5">
+<title>Study Planner Pro</title> <script src="https://cdn.tailwindcss.com"></script> <script>
+tailwind.config = { darkMode: "class", theme: {
+extend: { colors: { brand: {
+50: "#eef2ff", 100: "#e0e7ff", 500: "#6366f1",
+600: "#4f46e5", 700: "#4338ca" }
+} } }
+}; </script> <style>
+:root { color-scheme: light; --page-bg: #f8fafc;
+--card-bg: #ffffff; --main-text: #0f172a; --muted-text: #64748b;
+--line-color: #e2e8f0; --brand-color: #4f46e5; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-height: 100vh;
+background: var(--page-bg); color: var(--main-text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+transition: background-color 0.2s ease, color 0.2s ease; } button,
+input, select, textarea {
+font: inherit; } button {
+cursor: pointer; } button:disabled {
+cursor: not-allowed; opacity: 0.55; }
+.app-shell { display: grid; grid-template-columns: 245px minmax(0, 1fr);
+min-height: 100vh; } .sidebar {
+position: sticky; top: 0; height: 100vh;
+overflow-y: auto; border-right: 1px solid var(--line-color); background: var(--card-bg);
+padding: 24px 16px; } .main-area {
+min-width: 0; padding: 28px; }
+.brand-mark { display: inline-flex; align-items: center;
+justify-content: center; width: 42px; height: 42px;
+border-radius: 14px; background: #4f46e5; color: #fff;
+font-size: 21px; font-weight: 800; box-shadow: 0 8px 18px rgb(79 70 229 / 20%);
+} .nav-button { display: flex;
+width: 100%; align-items: center; gap: 12px;
+border: 0; border-radius: 12px; padding: 12px 14px;
+background: transparent; color: var(--muted-text); text-align: left;
+transition: background-color 0.2s ease, color 0.2s ease; } .nav-button:hover {
+background: #eef2ff; color: #4338ca; }
+.nav-button.active { background: #eef2ff; color: #4338ca;
+font-weight: 700; } .card {
+border: 1px solid var(--line-color); border-radius: 18px; background: var(--card-bg);
+box-shadow: 0 4px 18px rgb(15 23 42 / 3%); } .stat-card {
+position: relative; overflow: hidden; min-height: 130px;
+padding: 20px; } .stat-icon {
+display: inline-flex; align-items: center; justify-content: center;
+width: 42px; height: 42px; border-radius: 13px;
+font-size: 20px; } .field {
+width: 100%; min-width: 0; border: 1px solid var(--line-color);
+border-radius: 10px; padding: 10px 12px; background: var(--card-bg);
+color: var(--main-text); outline: none; }
+.field:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgb(99 102 241 / 12%);
+} .field-label { display: block;
+margin-bottom: 6px; color: var(--muted-text); font-size: 12px;
+font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+} .primary-button { border: 0;
+border-radius: 10px; padding: 10px 16px; background: #4f46e5;
+color: #fff; font-weight: 700; transition: background-color 0.2s ease, transform 0.2s ease;
+} .primary-button:hover { background: #4338ca;
+transform: translateY(-1px); } .secondary-button {
+border: 1px solid var(--line-color); border-radius: 10px; padding: 9px 13px;
+background: var(--card-bg); color: var(--main-text); font-weight: 600;
+} .secondary-button:hover { background: #f1f5f9;
+} .danger-button { border: 1px solid #fecaca;
+border-radius: 9px; padding: 7px 10px; background: #fff1f2;
+color: #be123c; font-size: 13px; font-weight: 700;
+} .small-button { border: 1px solid var(--line-color);
+border-radius: 8px; padding: 6px 9px; background: var(--card-bg);
+color: var(--muted-text); font-size: 12px; font-weight: 700;
+} .small-button:hover { color: #4f46e5;
+border-color: #a5b4fc; } .task-row {
+display: flex; align-items: flex-start; gap: 12px;
+padding: 15px 0; border-bottom: 1px solid var(--line-color); }
+.task-row:last-child { border-bottom: 0; }
+.task-checkbox { width: 18px; height: 18px;
+margin-top: 3px; accent-color: #4f46e5; flex-shrink: 0;
+} .task-title { overflow-wrap: anywhere;
+font-weight: 700; } .task-title.is-complete {
+color: #94a3b8; text-decoration: line-through; }
+.task-meta { display: flex; flex-wrap: wrap;
+gap: 7px; margin-top: 7px; color: var(--muted-text);
+font-size: 12px; } .pill {
+display: inline-flex; align-items: center; border-radius: 999px;
+padding: 4px 9px; font-size: 11px; font-weight: 800;
+white-space: nowrap; } .priority-high {
+background: #ffe4e6; color: #be123c; }
+.priority-medium { background: #fef3c7; color: #92400e;
+} .priority-low { background: #dcfce7;
+color: #166534; } .category-pill {
+background: #eef2ff; color: #4338ca; }
+.overdue-pill { background: #fee2e2; color: #991b1b;
+} .filter-tab { border: 1px solid var(--line-color);
+border-radius: 9px; padding: 8px 12px; background: var(--card-bg);
+color: var(--muted-text); font-size: 13px; font-weight: 700;
+} .filter-tab.active { border-color: #4f46e5;
+background: #eef2ff; color: #4338ca; }
+.progress-track { height: 9px; overflow: hidden;
+border-radius: 999px; background: #e2e8f0; }
+.progress-fill { height: 100%; width: 0;
+border-radius: inherit; background: linear-gradient(90deg, #6366f1, #8b5cf6); transition: width 0.3s ease;
+} .chart-bar { display: flex;
+min-height: 125px; align-items: flex-end; justify-content: center;
+gap: 10px; padding: 12px 4px 0; }
+.chart-column { display: flex; flex: 1;
+max-width: 54px; height: 115px; flex-direction: column;
+align-items: center; justify-content: flex-end; gap: 6px;
+} .chart-column .bar { width: 100%;
+min-height: 4px; border-radius: 7px 7px 2px 2px; background: #818cf8;
+transition: height 0.3s ease; } .chart-column .bar-label {
+color: var(--muted-text); font-size: 10px; }
+.note-card { display: flex; min-height: 145px;
+flex-direction: column; gap: 10px; border: 1px solid var(--line-color);
+border-radius: 13px; padding: 14px; background: var(--card-bg);
+} .note-content { flex: 1;
+overflow-wrap: anywhere; white-space: pre-wrap; color: var(--muted-text);
+font-size: 13px; } .timer-ring {
+display: flex; width: 220px; height: 220px;
+align-items: center; justify-content: center; border: 12px solid #e0e7ff;
+border-top-color: #6366f1; border-radius: 50%; margin: 0 auto;
+background: var(--card-bg); box-shadow: 0 12px 35px rgb(79 70 229 / 10%); }
+.timer-digits { font-size: 42px; font-weight: 800;
+letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+.modal-backdrop { position: fixed; z-index: 50;
+inset: 0; display: flex; align-items: center;
+justify-content: center; padding: 16px; background: rgb(15 23 42 / 55%);
+} .modal-panel { width: min(100%, 560px);
+max-height: 90vh; overflow-y: auto; border-radius: 18px;
+padding: 24px; background: var(--card-bg); color: var(--main-text);
+box-shadow: 0 25px 60px rgb(15 23 42 / 20%); } .toast {
+position: fixed; z-index: 80; right: 22px;
+bottom: 22px; max-width: min(360px, calc(100vw - 44px)); border-radius: 12px;
+padding: 13px 17px; background: #0f172a; color: white;
+box-shadow: 0 12px 30px rgb(15 23 42 / 20%); animation: toast-in 0.2s ease-out; }
+@keyframes toast-in { from { opacity: 0;
+transform: translateY(10px); } to {
+opacity: 1; transform: translateY(0); }
+} .hidden-view { display: none !important;
+} .empty-state { padding: 35px 12px;
+text-align: center; color: var(--muted-text); }
+.empty-state .empty-icon { margin-bottom: 8px; font-size: 30px;
+} .section-heading { margin-bottom: 16px;
+font-size: 18px; font-weight: 800; }
+.muted { color: var(--muted-text); }
+.dark { color-scheme: dark; --page-bg: #0f172a;
+--card-bg: #172033; --main-text: #e2e8f0; --muted-text: #94a3b8;
+--line-color: #334155; } .dark .sidebar {
+background: #111827; } .dark .nav-button:hover,
+.dark .nav-button.active { background: #312e81; color: #e0e7ff;
+} .dark .filter-tab.active { background: #312e81;
+color: #e0e7ff; border-color: #6366f1; }
+.dark .secondary-button:hover { background: #1e293b; }
+.dark .category-pill { background: #312e81; color: #e0e7ff;
+} .dark .priority-high { background: #4c1d2b;
+color: #fecdd3; } .dark .priority-medium {
+background: #422006; color: #fde68a; }
+.dark .priority-low { background: #14532d; color: #bbf7d0;
+} .dark .overdue-pill { background: #7f1d1d;
+color: #fecaca; } .dark .danger-button {
+background: #4c1d2b; border-color: #881337; color: #fecdd3;
+} .dark .progress-track { background: #334155;
+} .dark .timer-ring { border-color: #312e81;
+border-top-color: #818cf8; } .dark .secondary-button,
+.dark .small-button, .dark .filter-tab { background: var(--card-bg);
+} @media (max-width: 1000px) { .app-shell {
+grid-template-columns: 205px minmax(0, 1fr); } .main-area {
+padding: 22px; } }
+@media (max-width: 760px) { .app-shell { display: block;
+} .sidebar { position: static;
+height: auto; padding: 14px; border-right: 0;
+border-bottom: 1px solid var(--line-color); } .sidebar-top {
+display: flex; align-items: center; justify-content: space-between;
+gap: 12px; } .sidebar-nav {
+display: flex; overflow-x: auto; gap: 6px;
+margin-top: 14px; padding-bottom: 2px; }
+.nav-button { width: auto; flex-shrink: 0;
+padding: 9px 12px; font-size: 13px; }
+.sidebar-bottom { display: none; }
+.main-area { padding: 17px; }
+.stat-card { min-height: 112px; padding: 14px;
+} } @media (max-width: 480px) {
+.main-area { padding: 12px; }
+.timer-ring { width: 190px; height: 190px;
+} .timer-digits { font-size: 36px;
+} .task-row { gap: 9px;
+} .task-actions { display: flex;
+flex-direction: column; gap: 5px; }
+} </style> </head>
+<body> <div class="app-shell"> <aside class="sidebar">
+<div class="sidebar-top"> <div class="flex items-center gap-3"> <div class="brand-mark">S</div>
+<div> <h1 class="text-lg font-extrabold tracking-tight">Study Planner</h1> <p class="text-xs muted">Plan smart. Study better.</p>
+</div> </div> </div>
+<nav class="sidebar-nav mt-9 space-y-2" aria-label="Main navigation"> <button class="nav-button active" data-view="dashboard"> <span>▦</span>
+<span>Dashboard</span> </button> <button class="nav-button" data-view="tasks">
+<span>☑</span> <span>My Tasks</span> </button>
+<button class="nav-button" data-view="focus"> <span>◷</span> <span>Focus Timer</span>
+</button> <button class="nav-button" data-view="notes"> <span>▤</span>
+<span>Study Notes</span> </button> <button class="nav-button" data-view="settings">
+<span>⚙</span> <span>Settings & Backup</span> </button>
+</nav> <div class="sidebar-bottom mt-12 rounded-2xl bg-indigo-50 p-4"> <p class="font-bold text-indigo-900">Small steps matter!</p>
+<p class="mt-2 text-sm text-indigo-700"> Finish one task at a time and keep moving forward. </p>
+</div> </aside> <main class="main-area">
+<header class="mb-7 flex flex-wrap items-center justify-between gap-4"> <div> <p id="todayLabel" class="mb-1 text-sm muted">Your study workspace</p>
+<h2 id="pageTitle" class="text-2xl font-extrabold md:text-3xl">Dashboard</h2> <p id="pageSubtitle" class="mt-1 text-sm muted"> Here is your study progress at a glance.
+</p> </div> <div class="flex flex-wrap items-center gap-2">
+<button id="themeButton" class="secondary-button" type="button"> ☾ Dark mode </button>
+<button id="headerAddButton" class="primary-button" type="button"> + Add task </button>
+</div> </header> <section id="dashboardView" class="view-section">
+<div class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4"> <article class="card stat-card"> <div class="flex items-center justify-between">
+<p class="text-sm muted">Total tasks</p> <span class="stat-icon bg-indigo-100 text-indigo-700">☷</span> </div>
+<p id="statTotal" class="mt-4 text-3xl font-extrabold">0</p> <p class="mt-1 text-xs muted">All your study goals</p> </article>
+<article class="card stat-card"> <div class="flex items-center justify-between"> <p class="text-sm muted">Completed</p>
+<span class="stat-icon bg-green-100 text-green-700">✓</span> </div> <p id="statCompleted" class="mt-4 text-3xl font-extrabold">0</p>
+<p class="mt-1 text-xs muted">Tasks finished</p> </article> <article class="card stat-card">
+<div class="flex items-center justify-between"> <p class="text-sm muted">Pending</p> <span class="stat-icon bg-amber-100 text-amber-700">◷</span>
+</div> <p id="statPending" class="mt-4 text-3xl font-extrabold">0</p> <p class="mt-1 text-xs muted">Still to do</p>
+</article> <article class="card stat-card"> <div class="flex items-center justify-between">
+<p class="text-sm muted">Overdue</p> <span class="stat-icon bg-rose-100 text-rose-700">!</span> </div>
+<p id="statOverdue" class="mt-4 text-3xl font-extrabold">0</p> <p class="mt-1 text-xs muted">Past-due tasks</p> </article>
+</div> <div class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3"> <section class="card p-5 xl:col-span-2">
+<div class="mb-4 flex items-center justify-between gap-3"> <div> <h3 class="section-heading mb-1">Today's focus</h3>
+<p class="text-sm muted">Your next steps for today.</p> </div> <button id="viewAllTasksButton" class="small-button" type="button">
+View all </button> </div>
+<div id="todayTasksList"></div> </section> <section class="card p-5">
+<h3 class="section-heading">Overall progress</h3> <div class="mb-3 flex items-end justify-between"> <p id="progressPercent" class="text-4xl font-extrabold">0%</p>
+<p class="text-sm muted">completed</p> </div> <div class="progress-track">
+<div id="progressBar" class="progress-fill"></div> </div> <p id="progressDescription" class="mt-3 text-sm muted">
+Add tasks to start tracking your progress. </p> <div class="mt-6 border-t pt-4" style="border-color: var(--line-color)">
+<div class="mb-2 flex justify-between text-sm"> <span class="muted">High priority pending</span> <strong id="highPriorityCount">0</strong>
+</div> <div class="mb-2 flex justify-between text-sm"> <span class="muted">Study notes</span>
+<strong id="noteCount">0</strong> </div> <div class="flex justify-between text-sm">
+<span class="muted">Focus sessions</span> <strong id="focusCount">0</strong> </div>
+</div> </section> </div>
+<div class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2"> <section class="card p-5"> <div class="mb-2">
+<h3 class="section-heading mb-1">Weekly activity</h3> <p class="text-sm muted">Tasks completed over the last seven days.</p> </div>
+<div id="weeklyChart" class="chart-bar"></div> </section> <section class="card p-5">
+<h3 class="section-heading">Upcoming deadlines</h3> <p class="mb-3 text-sm muted">Plan ahead and avoid last-minute work.</p> <div id="upcomingList"></div>
+</section> </div> </section>
+<section id="tasksView" class="view-section hidden-view"> <section class="card mb-5 p-5"> <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+<div> <h3 class="section-heading mb-1">Task manager</h3> <p class="text-sm muted">Create, organize and track your work.</p>
+</div> <button id="taskPageAddButton" class="primary-button" type="button"> + New task
+</button> </div> <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+<div> <label class="field-label" for="searchInput">Search tasks</label> <input id="searchInput" class="field" type="search"
+placeholder="Search by title or details"> </div> <div>
+<label class="field-label" for="statusFilter">Status</label> <select id="statusFilter" class="field"> <option value="all">All statuses</option>
+<option value="pending">Pending</option> <option value="completed">Completed</option> <option value="overdue">Overdue</option>
+</select> </div> <div>
+<label class="field-label" for="priorityFilter">Priority</label> <select id="priorityFilter" class="field"> <option value="all">All priorities</option>
+<option value="High">High</option> <option value="Medium">Medium</option> <option value="Low">Low</option>
+</select> </div> <div>
+<label class="field-label" for="sortFilter">Sort by</label> <select id="sortFilter" class="field"> <option value="deadline">Nearest deadline</option>
+<option value="priority">Priority</option> <option value="created">Recently added</option> <option value="title">Task name</option>
+</select> </div> </div>
+<div class="mt-4 flex flex-wrap gap-2"> <button class="filter-tab active" data-category="all" type="button">All</button> <button class="filter-tab" data-category="Assignment" type="button">Assignments</button>
+<button class="filter-tab" data-category="Exam" type="button">Exams</button> <button class="filter-tab" data-category="Project" type="button">Projects</button> <button class="filter-tab" data-category="Personal" type="button">Personal</button>
+</div> </section> <section class="card p-5">
+<div class="mb-3 flex flex-wrap items-center justify-between gap-2"> <h3 class="section-heading mb-0">Your tasks</h3> <p id="taskResultCount" class="text-sm muted">0 tasks</p>
+</div> <div id="allTasksList"></div> </section>
+</section> <section id="focusView" class="view-section hidden-view"> <div class="grid grid-cols-1 gap-5 xl:grid-cols-3">
+<section class="card p-6 text-center xl:col-span-2"> <p class="mb-2 text-sm font-bold uppercase tracking-widest text-indigo-500"> Focus room
+</p> <h3 id="timerModeTitle" class="mb-2 text-2xl font-extrabold">Focus session</h3> <p id="timerDescription" class="mb-7 text-sm muted">
+Work without distractions for 25 minutes. </p> <div class="timer-ring">
+<div> <p id="timerDigits" class="timer-digits">25:00</p> <p id="timerStatus" class="mt-1 text-xs muted">Ready to focus</p>
+</div> </div> <div class="mt-7 flex flex-wrap justify-center gap-3">
+<button id="timerStartButton" class="primary-button" type="button"> ▶ Start </button>
+<button id="timerPauseButton" class="secondary-button" type="button"> Ⅱ Pause </button>
+<button id="timerResetButton" class="secondary-button" type="button"> ↺ Reset </button>
+</div> <div class="mt-6 flex flex-wrap justify-center gap-2"> <button class="filter-tab active" data-timer-mode="focus" type="button">
+25 min focus </button> <button class="filter-tab" data-timer-mode="short" type="button">
+5 min break </button> <button class="filter-tab" data-timer-mode="long" type="button">
+15 min long break </button> </div>
+</section> <section class="card p-5"> <h3 class="section-heading">Focus statistics</h3>
+<div class="rounded-xl bg-indigo-50 p-4"> <p class="text-sm text-indigo-700">Completed sessions</p> <p id="focusSessionStat" class="mt-2 text-3xl font-extrabold text-indigo-700">0</p>
+</div> <div class="mt-4 rounded-xl p-4" style="background: var(--page-bg)"> <p class="text-sm muted">Total focus minutes</p>
+<p id="focusMinutesStat" class="mt-2 text-2xl font-extrabold">0</p> </div> <div class="mt-5">
+<h4 class="mb-2 font-bold">How Pomodoro works</h4> <ol class="list-inside list-decimal space-y-2 text-sm muted"> <li>Choose a task to study.</li>
+<li>Focus for 25 minutes.</li> <li>Take a short break.</li> <li>Repeat and track sessions.</li>
+</ol> </div> </section>
+</div> </section> <section id="notesView" class="view-section hidden-view">
+<section class="card mb-5 p-5"> <h3 class="section-heading mb-1">Study notes</h3> <p class="mb-4 text-sm muted">Keep quick reminders, definitions and ideas in one place.</p>
+<form id="noteForm" class="space-y-3"> <div> <label class="field-label" for="noteTitle">Note title</label>
+<input id="noteTitle" class="field" maxlength="80" placeholder="Example: Graph theory revision" required> </div>
+<div> <label class="field-label" for="noteBody">Note content</label> <textarea id="noteBody" class="field" rows="4" maxlength="2000"
+placeholder="Write your notes here..." required></textarea> </div> <div class="flex flex-wrap gap-2">
+<button id="noteSubmitButton" class="primary-button" type="submit"> + Save note </button>
+<button id="noteCancelButton" class="secondary-button hidden-view" type="button">Cancel edit</button> </div>
+</form> </section> <section class="card p-5">
+<div class="mb-4 flex items-center justify-between gap-3"> <h3 class="section-heading mb-0">Saved notes</h3> <span id="notesResultCount" class="text-sm muted">0 notes</span>
+</div> <div id="notesGrid" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3"></div> </section>
+</section> <section id="settingsView" class="view-section hidden-view"> <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
+<section class="card p-5"> <h3 class="section-heading">Appearance</h3> <p class="mb-4 text-sm muted">Personalize the planner display.</p>
+<div class="flex items-center justify-between gap-3 border-b py-4" style="border-color: var(--line-color)"> <div>
+<p class="font-bold">Dark mode</p> <p class="text-sm muted">Use a darker color theme.</p> </div>
+<button id="settingsThemeButton" class="secondary-button" type="button"> Toggle theme </button>
+</div> <div class="py-4"> <p class="font-bold">Your local data</p>
+<p class="mt-1 text-sm muted"> Tasks, notes and focus statistics are stored in this browser. They are not sent to a server.
+</p> </div> </section>
+<section class="card p-5"> <h3 class="section-heading">Backup and restore</h3> <p class="mb-4 text-sm muted">
+Download your data as a JSON file or restore a previous backup. </p> <div class="flex flex-wrap gap-2">
+<button id="exportButton" class="primary-button" type="button"> ↓ Export backup </button>
+<button id="importButton" class="secondary-button" type="button"> ↑ Import backup </button>
+<input id="importFileInput" type="file" accept=".json,application/json" class="hidden"> </div>
+<div class="mt-5 rounded-xl p-4" style="background: var(--page-bg)"> <p class="text-sm muted">Current data summary</p> <div class="mt-3 flex justify-between text-sm">
+<span>Tasks</span><strong id="backupTaskCount">0</strong> </div> <div class="mt-2 flex justify-between text-sm">
+<span>Notes</span><strong id="backupNoteCount">0</strong> </div> <div class="mt-2 flex justify-between text-sm">
+<span>Focus sessions</span><strong id="backupFocusCount">0</strong> </div> </div>
+</section> <section class="card p-5 xl:col-span-2"> <h3 class="section-heading">Danger zone</h3>
+<p class="mb-4 text-sm muted"> This action permanently clears the planner data from this browser. Export a backup first if you need to keep your information.
+</p> <button id="resetAppButton" class="danger-button" type="button"> Reset all app data
+</button> </section> </div>
+</section> <footer class="mt-8 border-t pt-5 text-center text-xs muted" style="border-color: var(--line-color)">
+Study Planner Pro · Tools Mid Exam · Built with HTML, CSS, Tailwind CSS and JavaScript </footer> </main>
+</div> <div id="taskModal" class="modal-backdrop hidden-view" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+<div class="modal-panel"> <div class="mb-5 flex items-center justify-between gap-3"> <div>
+<h3 id="taskModalTitle" class="text-xl font-extrabold">Add a new task</h3> <p class="mt-1 text-sm muted">Give your task a clear goal and deadline.</p> </div>
+<button id="closeTaskModalButton" class="secondary-button" type="button" aria-label="Close task form">✕</button> </div>
+<form id="taskForm" class="space-y-4"> <input id="editingTaskId" type="hidden"> <div>
+<label class="field-label" for="taskTitle">Task title *</label> <input id="taskTitle" class="field" maxlength="120" placeholder="Example: Complete data structure assignment" required>
+</div> <div> <label class="field-label" for="taskDetails">Details</label>
+<textarea id="taskDetails" class="field" rows="3" maxlength="800" placeholder="Optional description or reminder"></textarea> </div>
+<div class="grid grid-cols-1 gap-3 sm:grid-cols-2"> <div> <label class="field-label" for="taskCategory">Category</label>
+<select id="taskCategory" class="field"> <option>Assignment</option> <option>Exam</option>
+<option>Project</option> <option>Personal</option> </select>
+</div> <div> <label class="field-label" for="taskPriority">Priority</label>
+<select id="taskPriority" class="field"> <option>High</option> <option selected>Medium</option>
+<option>Low</option> </select> </div>
+</div> <div class="grid grid-cols-1 gap-3 sm:grid-cols-2"> <div>
+<label class="field-label" for="taskDeadline">Deadline</label> <input id="taskDeadline" class="field" type="date"> </div>
+<div> <label class="field-label" for="taskEstimate">Estimated minutes</label> <input id="taskEstimate" class="field" type="number"
+min="5" max="600" step="5" value="30"> </div> </div>
+<div class="flex flex-wrap justify-end gap-2 border-t pt-4" style="border-color: var(--line-color)"> <button id="cancelTaskButton" class="secondary-button" type="button">
+Cancel </button> <button id="saveTaskButton" class="primary-button" type="submit">
+Save task </button> </div>
+</form> </div> </div>
+<div id="toast" class="toast hidden-view" role="status" aria-live="polite"></div> <script> "use strict";
+const STORAGE_KEY = "studyPlannerPro_v1"; const TIMER_MODES = { focus: {
+label: "Focus session", seconds: 25 * 60, description: "Work without distractions for 25 minutes."
+}, short: { label: "Short break",
+seconds: 5 * 60, description: "Take a five-minute break and refresh your mind." },
+long: { label: "Long break", seconds: 15 * 60,
+description: "Relax for fifteen minutes before your next round." } };
+const PRIORITY_ORDER = { High: 1, Medium: 2,
+Low: 3 }; const VIEW_CONTENT = {
+dashboard: { title: "Dashboard", subtitle: "Here is your study progress at a glance."
+}, tasks: { title: "My Tasks",
+subtitle: "Manage deadlines, priorities and study goals." }, focus: {
+title: "Focus Timer", subtitle: "Use focused sessions to make study time count." },
+notes: { title: "Study Notes", subtitle: "Save quick ideas and revision reminders."
+}, settings: { title: "Settings & Backup",
+subtitle: "Manage your theme and keep a backup of your data." } };
+let state = loadState(); let activeView = "dashboard"; let activeCategory = "all";
+let editingNoteId = null; let timerMode = "focus"; let timerRemaining = TIMER_MODES.focus.seconds;
+let timerInterval = null; let timerRunning = false; let toastTimeout = null;
+function $(id) { return document.getElementById(id); }
+function makeId() { if (window.crypto && typeof window.crypto.randomUUID === "function") { return window.crypto.randomUUID();
+} return String(Date.now()) + "-" + Math.random().toString(16).slice(2); }
+function localDateString(date = new Date()) { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, "0");
+const day = String(date.getDate()).padStart(2, "0"); return `${year}-${month}-${day}`; }
+function formatDate(dateString) { if (!dateString) { return "No deadline";
+} const date = new Date(`${dateString}T00:00:00`); if (Number.isNaN(date.getTime())) {
+return "Invalid date"; } return date.toLocaleDateString(undefined, {
+day: "numeric", month: "short", year: "numeric"
+}); } function formatShortDay(date) {
+return date.toLocaleDateString(undefined, { weekday: "short" });
+} function escapeText(value) { return String(value ?? "")
+.replaceAll("&", "&amp;") .replaceAll("<", "&lt;") .replaceAll(">", "&gt;")
+.replaceAll('"', "&quot;") .replaceAll("'", "&#039;"); }
+function isOverdue(task) { return Boolean( task.deadline &&
+!task.completed && task.deadline < localDateString() );
+} function getPriorityClass(priority) { if (priority === "High") {
+return "priority-high"; } if (priority === "Low") {
+return "priority-low"; } return "priority-medium";
+} function showToast(message) { const toast = $("toast");
+toast.textContent = message; toast.classList.remove("hidden-view"); window.clearTimeout(toastTimeout);
+toastTimeout = window.setTimeout(() => { toast.classList.add("hidden-view"); }, 2600);
+} function emptyState(icon, title, description) { return `
+<div class="empty-state"> <div class="empty-icon">${escapeText(icon)}</div> <p class="font-bold">${escapeText(title)}</p>
+<p class="mt-1 text-sm">${escapeText(description)}</p> </div> `;
+} function createDefaultState() { return {
+tasks: [], notes: [], focusSessions: [],
+theme: "light" }; }
+function loadState() { try { const raw = localStorage.getItem(STORAGE_KEY);
+if (!raw) { return createDefaultState(); }
+const parsed = JSON.parse(raw); return { tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
+notes: Array.isArray(parsed.notes) ? parsed.notes : [], focusSessions: Array.isArray(parsed.focusSessions) ? parsed.focusSessions
+: [], theme: parsed.theme === "dark" ? "dark" : "light" };
+} catch (error) { console.error("Could not load saved planner data:", error); return createDefaultState();
+} } function saveState() {
+try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); updateBackupSummary();
+} catch (error) { console.error("Could not save planner data:", error); showToast("Could not save data. Browser storage may be full.");
+} } function switchView(viewName) {
+if (!VIEW_CONTENT[viewName]) { return; }
+activeView = viewName; document.querySelectorAll(".view-section").forEach(section => { section.classList.add("hidden-view");
+}); $(`${viewName}View`).classList.remove("hidden-view"); document.querySelectorAll(".nav-button").forEach(button => {
+button.classList.toggle( "active", button.dataset.view === viewName
+); }); $("pageTitle").textContent = VIEW_CONTENT[viewName].title;
+$("pageSubtitle").textContent = VIEW_CONTENT[viewName].subtitle; if (viewName === "tasks") { renderAllTasks();
+} if (viewName === "notes") { renderNotes();
+} if (viewName === "dashboard") { renderDashboard();
+} } document.querySelectorAll(".nav-button").forEach(button => {
+button.addEventListener("click", () => { switchView(button.dataset.view); });
+}); $("viewAllTasksButton").addEventListener("click", () => { switchView("tasks");
+}); function applyTheme() { const isDark = state.theme === "dark";
+document.documentElement.classList.toggle("dark", isDark); $("themeButton").textContent = isDark ? "☀ Light mode"
+: "☾ Dark mode"; } function toggleTheme() {
+state.theme = state.theme === "dark" ? "light" : "dark"; applyTheme(); saveState();
+showToast(`${state.theme === "dark" ? "Dark" : "Light"} mode enabled.`); } $("themeButton").addEventListener("click", toggleTheme);
+$("settingsThemeButton").addEventListener("click", toggleTheme); function openTaskModal(taskId = null) { const form = $("taskForm");
+form.reset(); $("editingTaskId").value = ""; $("taskEstimate").value = "30";
+$("taskPriority").value = "Medium"; $("taskCategory").value = "Assignment"; if (taskId) {
+const task = state.tasks.find(item => item.id === taskId); if (!task) { showToast("Task could not be found.");
+return; } $("editingTaskId").value = task.id;
+$("taskTitle").value = task.title; $("taskDetails").value = task.details || ""; $("taskCategory").value = task.category || "Assignment";
+$("taskPriority").value = task.priority || "Medium"; $("taskDeadline").value = task.deadline || ""; $("taskEstimate").value = String(task.estimate || 30);
+$("taskModalTitle").textContent = "Edit task"; $("saveTaskButton").textContent = "Update task"; } else {
+$("taskModalTitle").textContent = "Add a new task"; $("saveTaskButton").textContent = "Save task"; }
+$("taskModal").classList.remove("hidden-view"); $("taskTitle").focus(); }
+function closeTaskModal() { $("taskModal").classList.add("hidden-view"); }
+$("headerAddButton").addEventListener("click", () => { openTaskModal(); });
+$("taskPageAddButton").addEventListener("click", () => { openTaskModal(); });
+$("closeTaskModalButton").addEventListener("click", closeTaskModal); $("cancelTaskButton").addEventListener("click", closeTaskModal); $("taskModal").addEventListener("click", event => {
+if (event.target === $("taskModal")) { closeTaskModal(); }
+}); document.addEventListener("keydown", event => { if (event.key === "Escape") {
+closeTaskModal(); } });
+$("taskForm").addEventListener("submit", event => { event.preventDefault(); const title = $("taskTitle").value.trim();
+const details = $("taskDetails").value.trim(); const category = $("taskCategory").value; const priority = $("taskPriority").value;
+const deadline = $("taskDeadline").value; const estimate = Number($("taskEstimate").value); const editingId = $("editingTaskId").value;
+if (!title) { showToast("Please enter a task title."); $("taskTitle").focus();
+return; } if (!Number.isFinite(estimate) || estimate < 5 || estimate > 600) {
+showToast("Estimated time must be between 5 and 600 minutes."); return; }
+if (editingId) { const task = state.tasks.find(item => item.id === editingId); if (!task) {
+showToast("Task could not be found."); return; }
+task.title = title; task.details = details; task.category = category;
+task.priority = priority; task.deadline = deadline; task.estimate = estimate;
+task.updatedAt = new Date().toISOString(); showToast("Task updated successfully."); } else {
+state.tasks.push({ id: makeId(), title,
+details, category, priority,
+deadline, estimate, completed: false,
+createdAt: new Date().toISOString(), completedAt: null });
+showToast("New task added successfully."); } saveState();
+closeTaskModal(); renderAll(); });
+function toggleTaskComplete(taskId, completed) { const task = state.tasks.find(item => item.id === taskId); if (!task) {
+return; } task.completed = completed;
+task.completedAt = completed ? new Date().toISOString() : null; saveState(); renderAll();
+showToast(completed ? "Great work! Task completed." : "Task marked pending."); } function deleteTask(taskId) {
+const task = state.tasks.find(item => item.id === taskId); if (!task) { return;
+} const shouldDelete = window.confirm( `Delete "${task.title}"? This action cannot be undone.`
+); if (!shouldDelete) { return;
+} state.tasks = state.tasks.filter(item => item.id !== taskId); saveState();
+renderAll(); showToast("Task deleted."); }
+function duplicateTask(taskId) { const task = state.tasks.find(item => item.id === taskId); if (!task) {
+return; } state.tasks.push({
+...task, id: makeId(), title: `${task.title} (copy)`,
+completed: false, completedAt: null, createdAt: new Date().toISOString()
+}); saveState(); renderAll();
+showToast("Task duplicated."); } function taskMarkup(task, compact = false) {
+const overdue = isOverdue(task); const details = task.details ? `<p class="mt-1 text-sm muted">${escapeText(task.details)}</p>`
+: ""; const deadline = task.deadline ? `<span>Due: ${escapeText(formatDate(task.deadline))}</span>`
+: `<span>No deadline</span>`; const overdueLabel = overdue ? `<span class="pill overdue-pill">Overdue</span>`
+: ""; const actionButtons = compact ? ""
+: ` <div class="task-actions flex flex-wrap gap-1"> <button class="small-button" data-action="edit" data-id="${escapeText(task.id)}" type="button">Edit</button>
+<button class="small-button" data-action="duplicate" data-id="${escapeText(task.id)}" type="button">Copy</button> <button class="danger-button" data-action="delete" data-id="${escapeText(task.id)}" type="button">Delete</button> </div>
+`; return ` <article class="task-row">
+<input class="task-checkbox" type="checkbox"
+data-action="complete" data-id="${escapeText(task.id)}" aria-label="Mark ${escapeText(task.title)} complete"
+${task.completed ? "checked" : ""} > <div class="min-w-0 flex-1">
+<p class="task-title ${task.completed ? "is-complete" : ""}"> ${escapeText(task.title)} </p>
+${details} <div class="task-meta"> <span class="pill ${getPriorityClass(task.priority)}">
+${escapeText(task.priority || "Medium")} </span> <span class="pill category-pill">
+${escapeText(task.category || "Personal")} </span> ${deadline}
+${overdueLabel} </div> </div>
+${actionButtons} </article> `;
+} function attachTaskActions(container) { container.querySelectorAll("[data-action]").forEach(element => {
+const action = element.dataset.action; const taskId = element.dataset.id; if (action === "complete") {
+element.addEventListener("change", () => { toggleTaskComplete(taskId, element.checked); });
+} if (action === "edit") { element.addEventListener("click", () => {
+openTaskModal(taskId); }); }
+if (action === "delete") { element.addEventListener("click", () => { deleteTask(taskId);
+}); } if (action === "duplicate") {
+element.addEventListener("click", () => { duplicateTask(taskId); });
+} }); }
+function getFilteredTasks() { const searchTerm = $("searchInput").value.trim().toLowerCase(); const status = $("statusFilter").value;
+const priority = $("priorityFilter").value; const sort = $("sortFilter").value; let results = state.tasks.filter(task => {
+const matchesSearch = task.title.toLowerCase().includes(searchTerm) || (task.details || "").toLowerCase().includes(searchTerm);
+const matchesCategory = activeCategory === "all" || task.category === activeCategory;
+let matchesStatus = true; if (status === "pending") { matchesStatus = !task.completed;
+} if (status === "completed") { matchesStatus = task.completed;
+} if (status === "overdue") { matchesStatus = isOverdue(task);
+} const matchesPriority = priority === "all" ||
+task.priority === priority; return ( matchesSearch &&
+matchesCategory && matchesStatus && matchesPriority
+); }); results = [...results];
+if (sort === "deadline") { results.sort((a, b) => { const dateA = a.deadline || "9999-12-31";
+const dateB = b.deadline || "9999-12-31"; return dateA.localeCompare(dateB); });
+} if (sort === "priority") { results.sort((a, b) => {
+return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]; }); }
+if (sort === "created") { results.sort((a, b) => { return (b.createdAt || "").localeCompare(a.createdAt || "");
+}); } if (sort === "title") {
+results.sort((a, b) => a.title.localeCompare(b.title)); } return results;
+} function renderAllTasks() { const container = $("allTasksList");
+const tasks = getFilteredTasks(); $("taskResultCount").textContent = `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
+if (tasks.length === 0) { container.innerHTML = emptyState( "☷",
+"No tasks found", "Try changing your filters or add a new task." );
+return; } container.innerHTML = tasks.map(task => taskMarkup(task)).join("");
+attachTaskActions(container); } ["searchInput", "statusFilter", "priorityFilter", "sortFilter"].forEach(id => {
+$(id).addEventListener("input", renderAllTasks); $(id).addEventListener("change", renderAllTasks); });
+document.querySelectorAll("[data-category]").forEach(button => { button.addEventListener("click", () => { activeCategory = button.dataset.category;
+document.querySelectorAll("[data-category]").forEach(tab => { tab.classList.toggle("active", tab === button); });
+renderAllTasks(); }); });
+function calculateStats() { const total = state.tasks.length; const completed = state.tasks.filter(task => task.completed).length;
+const pending = total - completed; const overdue = state.tasks.filter(isOverdue).length; const highPriority = state.tasks.filter(task => {
+return task.priority === "High" && !task.completed; }).length; const percentage = total === 0
+? 0 : Math.round((completed / total) * 100); return {
+total, completed, pending,
+overdue, highPriority, percentage
+}; } function renderStatistics() {
+const stats = calculateStats(); $("statTotal").textContent = stats.total; $("statCompleted").textContent = stats.completed;
+$("statPending").textContent = stats.pending; $("statOverdue").textContent = stats.overdue; $("highPriorityCount").textContent = stats.highPriority;
+$("noteCount").textContent = state.notes.length; $("focusCount").textContent = state.focusSessions.length; $("progressPercent").textContent = `${stats.percentage}%`;
+$("progressBar").style.width = `${stats.percentage}%`; if (stats.total === 0) { $("progressDescription").textContent =
+"Add tasks to start tracking your progress."; } else if (stats.percentage === 100) { $("progressDescription").textContent =
+"Excellent! You completed every task in your planner."; } else { $("progressDescription").textContent =
+`${stats.completed} of ${stats.total} tasks completed. Keep going!`; } }
+function renderTodayTasks() { const container = $("todayTasksList"); const today = localDateString();
+const todayTasks = state.tasks .filter(task => !task.completed) .filter(task => !task.deadline || task.deadline <= today)
+.sort((a, b) => { return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]; })
+.slice(0, 5); if (todayTasks.length === 0) { container.innerHTML = emptyState(
+"☀", "Nothing urgent today", "Add a deadline or create a task to plan your study day."
+); return; }
+container.innerHTML = todayTasks .map(task => taskMarkup(task, true)) .join("");
+attachTaskActions(container); } function renderUpcomingTasks() {
+const container = $("upcomingList"); const today = localDateString(); const upcoming = state.tasks
+.filter(task => !task.completed && task.deadline && task.deadline >= today) .sort((a, b) => a.deadline.localeCompare(b.deadline)) .slice(0, 5);
+if (upcoming.length === 0) { container.innerHTML = emptyState( "▦",
+"No upcoming deadlines", "Tasks with future deadlines will appear here." );
+return; } container.innerHTML = upcoming.map(task => `
+<div class="flex items-start justify-between gap-3 border-b py-3 last:border-0" style="border-color: var(--line-color)"> <div class="min-w-0">
+<p class="break-words text-sm font-bold">${escapeText(task.title)}</p> <p class="mt-1 text-xs muted">${escapeText(task.category)}</p> </div>
+<div class="text-right"> <p class="whitespace-nowrap text-xs font-bold">${escapeText(formatDate(task.deadline))}</p> <span class="pill ${getPriorityClass(task.priority)} mt-1">
+${escapeText(task.priority)} </span> </div>
+</div> `).join(""); }
+function renderWeeklyChart() { const container = $("weeklyChart"); const days = [];
+for (let offset = 6; offset >= 0; offset -= 1) { const date = new Date(); date.setHours(0, 0, 0, 0);
+date.setDate(date.getDate() - offset); const key = localDateString(date); const count = state.tasks.filter(task => {
+if (!task.completedAt) { return false; }
+return localDateString(new Date(task.completedAt)) === key; }).length; days.push({
+key, label: formatShortDay(date), count
+}); } const maximum = Math.max(1, ...days.map(day => day.count));
+container.innerHTML = days.map(day => { const height = Math.max(4, (day.count / maximum) * 100); return `
+<div class="chart-column" title="${escapeText(day.key)}: ${day.count} completed"> <span class="text-xs font-bold">${day.count}</span> <div class="bar" style="height: ${height}px"></div>
+<span class="bar-label">${escapeText(day.label)}</span> </div> `;
+}).join(""); } function renderDashboard() {
+renderStatistics(); renderTodayTasks(); renderUpcomingTasks();
+renderWeeklyChart(); } $("noteForm").addEventListener("submit", event => {
+event.preventDefault(); const title = $("noteTitle").value.trim(); const content = $("noteBody").value.trim();
+if (!title || !content) { showToast("Please enter both a title and note content."); return;
+} if (editingNoteId) { const note = state.notes.find(item => item.id === editingNoteId);
+if (!note) { showToast("Note could not be found."); return;
+} note.title = title; note.content = content;
+note.updatedAt = new Date().toISOString(); showToast("Note updated."); } else {
+state.notes.unshift({ id: makeId(), title,
+content, createdAt: new Date().toISOString(), updatedAt: null
+}); showToast("Note saved."); }
+resetNoteForm(); saveState(); renderNotes();
+renderStatistics(); }); function resetNoteForm() {
+editingNoteId = null; $("noteForm").reset(); $("noteSubmitButton").textContent = "+ Save note";
+$("noteCancelButton").classList.add("hidden-view"); } $("noteCancelButton").addEventListener("click", resetNoteForm);
+function editNote(noteId) { const note = state.notes.find(item => item.id === noteId); if (!note) {
+showToast("Note could not be found."); return; }
+editingNoteId = note.id; $("noteTitle").value = note.title; $("noteBody").value = note.content;
+$("noteSubmitButton").textContent = "Update note"; $("noteCancelButton").classList.remove("hidden-view"); $("noteTitle").focus();
+window.scrollTo({ top: 0, behavior: "smooth"
+}); } function deleteNote(noteId) {
+const note = state.notes.find(item => item.id === noteId); if (!note) { return;
+} if (!window.confirm(`Delete note "${note.title}"?`)) { return;
+} state.notes = state.notes.filter(item => item.id !== noteId); if (editingNoteId === noteId) {
+resetNoteForm(); } saveState();
+renderNotes(); renderStatistics(); showToast("Note deleted.");
+} function renderNotes() { const container = $("notesGrid");
+$("notesResultCount").textContent = `${state.notes.length} note${state.notes.length === 1 ? "" : "s"}`; if (state.notes.length === 0) {
+container.innerHTML = emptyState( "▤", "No notes saved",
+"Create a note above to keep important study information." ); return;
+} container.innerHTML = state.notes.map(note => ` <article class="note-card">
+<div> <h4 class="break-words font-extrabold">${escapeText(note.title)}</h4> <p class="mt-1 text-xs muted">
+${escapeText(formatDate(localDateString(new Date(note.createdAt))))} </p> </div>
+<p class="note-content">${escapeText(note.content)}</p> <div class="flex flex-wrap gap-2 border-t pt-3" style="border-color: var(--line-color)">
+<button class="small-button" data-note-action="edit" data-note-id="${escapeText(note.id)}" type="button">Edit</button> <button class="danger-button" data-note-action="delete"
+data-note-id="${escapeText(note.id)}" type="button">Delete</button> </div> </article>
+`).join(""); container.querySelectorAll("[data-note-action]").forEach(button => { button.addEventListener("click", () => {
+const noteId = button.dataset.noteId; if (button.dataset.noteAction === "edit") { editNote(noteId);
+} if (button.dataset.noteAction === "delete") { deleteNote(noteId);
+} }); });
+} function setTimerMode(mode) { if (!TIMER_MODES[mode]) {
+return; } stopTimerInterval();
+timerMode = mode; timerRemaining = TIMER_MODES[mode].seconds; timerRunning = false;
+document.querySelectorAll("[data-timer-mode]").forEach(button => { button.classList.toggle( "active",
+button.dataset.timerMode === mode ); });
+$("timerModeTitle").textContent = TIMER_MODES[mode].label; $("timerDescription").textContent = TIMER_MODES[mode].description; $("timerStatus").textContent = "Ready to focus";
+renderTimer(); } document.querySelectorAll("[data-timer-mode]").forEach(button => {
+button.addEventListener("click", () => { setTimerMode(button.dataset.timerMode); });
+}); function renderTimer() { const minutes = Math.floor(timerRemaining / 60);
+const seconds = timerRemaining % 60; $("timerDigits").textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+$("timerStartButton").disabled = timerRunning; $("timerPauseButton").disabled = !timerRunning; $("focusSessionStat").textContent = state.focusSessions.length;
+const focusMinutes = state.focusSessions.reduce((sum, session) => { return sum + Number(session.minutes || 0); }, 0);
+$("focusMinutesStat").textContent = focusMinutes; } function stopTimerInterval() {
+if (timerInterval !== null) { window.clearInterval(timerInterval); timerInterval = null;
+} timerRunning = false; }
+function startTimer() { if (timerRunning) { return;
+} if (timerRemaining <= 0) { timerRemaining = TIMER_MODES[timerMode].seconds;
+} timerRunning = true; $("timerStatus").textContent = "Session in progress";
+renderTimer(); timerInterval = window.setInterval(() => { timerRemaining -= 1;
+if (timerRemaining <= 0) { timerRemaining = 0; finishTimer();
+return; } renderTimer();
+}, 1000); } function pauseTimer() {
+stopTimerInterval(); $("timerStatus").textContent = "Paused"; renderTimer();
+} function resetTimer() { stopTimerInterval();
+timerRemaining = TIMER_MODES[timerMode].seconds; $("timerStatus").textContent = "Ready to focus"; renderTimer();
+} function finishTimer() { stopTimerInterval();
+$("timerStatus").textContent = "Session completed!"; renderTimer(); if (timerMode === "focus") {
+state.focusSessions.push({ id: makeId(), minutes: 25,
+completedAt: new Date().toISOString() }); saveState();
+renderStatistics(); showToast("Focus session complete! Great job."); } else {
+showToast("Break finished. Ready for another session?"); } if ("Notification" in window && Notification.permission === "granted") {
+new Notification("Study Planner Pro", { body: `${TIMER_MODES[timerMode].label} finished.` });
+} if (typeof window.navigator.vibrate === "function") { window.navigator.vibrate([150, 80, 150]);
+} } $("timerStartButton").addEventListener("click", startTimer);
+$("timerPauseButton").addEventListener("click", pauseTimer); $("timerResetButton").addEventListener("click", resetTimer); function exportBackup() {
+const backup = { app: "Study Planner Pro", version: 1,
+exportedAt: new Date().toISOString(), data: state };
+const blob = new Blob( [JSON.stringify(backup, null, 2)], { type: "application/json" }
+); const url = URL.createObjectURL(blob); const link = document.createElement("a");
+link.href = url; link.download = `study-planner-backup-${localDateString()}.json`; document.body.appendChild(link);
+link.click(); link.remove(); URL.revokeObjectURL(url);
+showToast("Backup downloaded."); } $("exportButton").addEventListener("click", exportBackup);
+$("importButton").addEventListener("click", () => { $("importFileInput").click(); });
+$("importFileInput").addEventListener("change", async event => { const file = event.target.files[0]; if (!file) {
+return; } try {
+const text = await file.text(); const parsed = JSON.parse(text); const imported = parsed.data || parsed;
+if ( !imported || !Array.isArray(imported.tasks) ||
+!Array.isArray(imported.notes) || !Array.isArray(imported.focusSessions) ) {
+throw new Error("The file does not contain a valid planner backup."); } const shouldImport = window.confirm(
+"Import this backup? Your current planner data will be replaced." ); if (!shouldImport) {
+return; } state = {
+tasks: imported.tasks, notes: imported.notes, focusSessions: imported.focusSessions,
+theme: imported.theme === "dark" ? "dark" : "light" }; saveState();
+applyTheme(); renderAll(); showToast("Backup imported successfully.");
+} catch (error) { console.error("Backup import failed:", error); showToast("Import failed. Please select a valid JSON backup.");
+} finally { event.target.value = ""; }
+}); function updateBackupSummary() { $("backupTaskCount").textContent = state.tasks.length;
+$("backupNoteCount").textContent = state.notes.length; $("backupFocusCount").textContent = state.focusSessions.length; }
+$("resetAppButton").addEventListener("click", () => { const shouldReset = window.confirm( "Reset all tasks, notes, focus sessions and theme settings?"
+); if (!shouldReset) { return;
+} stopTimerInterval(); state = createDefaultState();
+resetNoteForm(); saveState(); applyTheme();
+setTimerMode("focus"); renderAll(); showToast("All app data has been reset.");
+switchView("dashboard"); }); function renderAll() {
+renderStatistics(); renderDashboard(); renderAllTasks();
+renderNotes(); renderTimer(); updateBackupSummary();
+} function initializeApp() { applyTheme();
+$("todayLabel").textContent = new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric",
+month: "long", year: "numeric" });
+renderAll(); switchView("dashboard"); setTimerMode("focus");
+} initializeApp(); </script>
+</body> </html>
+<!DOCTYPE html> <html lang="en"> <head>
+<meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <meta name="theme-color" content="#4f46e5">
+<title>Study Planner Pro</title> <script src="https://cdn.tailwindcss.com"></script> <script>
+tailwind.config = { darkMode: "class", theme: {
+extend: { colors: { brand: {
+50: "#eef2ff", 100: "#e0e7ff", 500: "#6366f1",
+600: "#4f46e5", 700: "#4338ca" }
+} } }
+}; </script> <style>
+:root { color-scheme: light; --page-bg: #f8fafc;
+--card-bg: #ffffff; --main-text: #0f172a; --muted-text: #64748b;
+--line-color: #e2e8f0; --brand-color: #4f46e5; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-height: 100vh;
+background: var(--page-bg); color: var(--main-text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+transition: background-color 0.2s ease, color 0.2s ease; } button,
+input, select, textarea {
+font: inherit; } button {
+cursor: pointer; } button:disabled {
+cursor: not-allowed; opacity: 0.55; }
+.app-shell { display: grid; grid-template-columns: 245px minmax(0, 1fr);
+min-height: 100vh; } .sidebar {
+position: sticky; top: 0; height: 100vh;
+overflow-y: auto; border-right: 1px solid var(--line-color); background: var(--card-bg);
+padding: 24px 16px; } .main-area {
+min-width: 0; padding: 28px; }
+.brand-mark { display: inline-flex; align-items: center;
+justify-content: center; width: 42px; height: 42px;
+border-radius: 14px; background: #4f46e5; color: #fff;
+font-size: 21px; font-weight: 800; box-shadow: 0 8px 18px rgb(79 70 229 / 20%);
+} .nav-button { display: flex;
+width: 100%; align-items: center; gap: 12px;
+border: 0; border-radius: 12px; padding: 12px 14px;
+background: transparent; color: var(--muted-text); text-align: left;
+transition: background-color 0.2s ease, color 0.2s ease; } .nav-button:hover {
+background: #eef2ff; color: #4338ca; }
+.nav-button.active { background: #eef2ff; color: #4338ca;
+font-weight: 700; } .card {
+border: 1px solid var(--line-color); border-radius: 18px; background: var(--card-bg);
+box-shadow: 0 4px 18px rgb(15 23 42 / 3%); } .stat-card {
+position: relative; overflow: hidden; min-height: 130px;
+padding: 20px; } .stat-icon {
+display: inline-flex; align-items: center; justify-content: center;
+width: 42px; height: 42px; border-radius: 13px;
+font-size: 20px; } .field {
+width: 100%; min-width: 0; border: 1px solid var(--line-color);
+border-radius: 10px; padding: 10px 12px; background: var(--card-bg);
+color: var(--main-text); outline: none; }
+.field:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgb(99 102 241 / 12%);
+} .field-label { display: block;
+margin-bottom: 6px; color: var(--muted-text); font-size: 12px;
+font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+} .primary-button { border: 0;
+border-radius: 10px; padding: 10px 16px; background: #4f46e5;
+color: #fff; font-weight: 700; transition: background-color 0.2s ease, transform 0.2s ease;
+} .primary-button:hover { background: #4338ca;
+transform: translateY(-1px); } .secondary-button {
+border: 1px solid var(--line-color); border-radius: 10px; padding: 9px 13px;
+background: var(--card-bg); color: var(--main-text); font-weight: 600;
+} .secondary-button:hover { background: #f1f5f9;
+} .danger-button { border: 1px solid #fecaca;
+border-radius: 9px; padding: 7px 10px; background: #fff1f2;
+color: #be123c; font-size: 13px; font-weight: 700;
+} .small-button { border: 1px solid var(--line-color);
+border-radius: 8px; padding: 6px 9px; background: var(--card-bg);
+color: var(--muted-text); font-size: 12px; font-weight: 700;
+} .small-button:hover { color: #4f46e5;
+border-color: #a5b4fc; } .task-row {
+display: flex; align-items: flex-start; gap: 12px;
+padding: 15px 0; border-bottom: 1px solid var(--line-color); }
+.task-row:last-child { border-bottom: 0; }
+.task-checkbox { width: 18px; height: 18px;
+margin-top: 3px; accent-color: #4f46e5; flex-shrink: 0;
+} .task-title { overflow-wrap: anywhere;
+font-weight: 700; } .task-title.is-complete {
+color: #94a3b8; text-decoration: line-through; }
+.task-meta { display: flex; flex-wrap: wrap;
+gap: 7px; margin-top: 7px; color: var(--muted-text);
+font-size: 12px; } .pill {
+display: inline-flex; align-items: center; border-radius: 999px;
+padding: 4px 9px; font-size: 11px; font-weight: 800;
+white-space: nowrap; } .priority-high {
+background: #ffe4e6; color: #be123c; }
+.priority-medium { background: #fef3c7; color: #92400e;
+} .priority-low { background: #dcfce7;
+color: #166534; } .category-pill {
+background: #eef2ff; color: #4338ca; }
+.overdue-pill { background: #fee2e2; color: #991b1b;
+} .filter-tab { border: 1px solid var(--line-color);
+border-radius: 9px; padding: 8px 12px; background: var(--card-bg);
+color: var(--muted-text); font-size: 13px; font-weight: 700;
+} .filter-tab.active { border-color: #4f46e5;
+background: #eef2ff; color: #4338ca; }
+.progress-track { height: 9px; overflow: hidden;
+border-radius: 999px; background: #e2e8f0; }
+.progress-fill { height: 100%; width: 0;
+border-radius: inherit; background: linear-gradient(90deg, #6366f1, #8b5cf6); transition: width 0.3s ease;
+} .chart-bar { display: flex;
+min-height: 125px; align-items: flex-end; justify-content: center;
+gap: 10px; padding: 12px 4px 0; }
+.chart-column { display: flex; flex: 1;
+max-width: 54px; height: 115px; flex-direction: column;
+align-items: center; justify-content: flex-end; gap: 6px;
+} .chart-column .bar { width: 100%;
+min-height: 4px; border-radius: 7px 7px 2px 2px; background: #818cf8;
+transition: height 0.3s ease; } .chart-column .bar-label {
+color: var(--muted-text); font-size: 10px; }
+.note-card { display: flex; min-height: 145px;
+flex-direction: column; gap: 10px; border: 1px solid var(--line-color);
+border-radius: 13px; padding: 14px; background: var(--card-bg);
+} .note-content { flex: 1;
+overflow-wrap: anywhere; white-space: pre-wrap; color: var(--muted-text);
+font-size: 13px; } .timer-ring {
+display: flex; width: 220px; height: 220px;
+align-items: center; justify-content: center; border: 12px solid #e0e7ff;
+border-top-color: #6366f1; border-radius: 50%; margin: 0 auto;
+background: var(--card-bg); box-shadow: 0 12px 35px rgb(79 70 229 / 10%); }
+.timer-digits { font-size: 42px; font-weight: 800;
+letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+.modal-backdrop { position: fixed; z-index: 50;
+inset: 0; display: flex; align-items: center;
+justify-content: center; padding: 16px; background: rgb(15 23 42 / 55%);
+} .modal-panel { width: min(100%, 560px);
+max-height: 90vh; overflow-y: auto; border-radius: 18px;
+padding: 24px; background: var(--card-bg); color: var(--main-text);
+box-shadow: 0 25px 60px rgb(15 23 42 / 20%); } .toast {
+position: fixed; z-index: 80; right: 22px;
+bottom: 22px; max-width: min(360px, calc(100vw - 44px)); border-radius: 12px;
+padding: 13px 17px; background: #0f172a; color: white;
+box-shadow: 0 12px 30px rgb(15 23 42 / 20%); animation: toast-in 0.2s ease-out; }
+@keyframes toast-in { from { opacity: 0;
+transform: translateY(10px); } to {
+opacity: 1; transform: translateY(0); }
+} .hidden-view { display: none !important;
+} .empty-state { padding: 35px 12px;
+text-align: center; color: var(--muted-text); }
+.empty-state .empty-icon { margin-bottom: 8px; font-size: 30px;
+} .section-heading { margin-bottom: 16px;
+font-size: 18px; font-weight: 800; }
+.muted { color: var(--muted-text); }
+.dark { color-scheme: dark; --page-bg: #0f172a;
+--card-bg: #172033; --main-text: #e2e8f0; --muted-text: #94a3b8;
+--line-color: #334155; } .dark .sidebar {
+background: #111827; } .dark .nav-button:hover,
+.dark .nav-button.active { background: #312e81; color: #e0e7ff;
+} .dark .filter-tab.active { background: #312e81;
+color: #e0e7ff; border-color: #6366f1; }
+.dark .secondary-button:hover { background: #1e293b; }
+.dark .category-pill { background: #312e81; color: #e0e7ff;
+} .dark .priority-high { background: #4c1d2b;
+color: #fecdd3; } .dark .priority-medium {
+background: #422006; color: #fde68a; }
+.dark .priority-low { background: #14532d; color: #bbf7d0;
+} .dark .overdue-pill { background: #7f1d1d;
+color: #fecaca; } .dark .danger-button {
+background: #4c1d2b; border-color: #881337; color: #fecdd3;
+} .dark .progress-track { background: #334155;
+} .dark .timer-ring { border-color: #312e81;
+border-top-color: #818cf8; } .dark .secondary-button,
+.dark .small-button, .dark .filter-tab { background: var(--card-bg);
+} @media (max-width: 1000px) { .app-shell {
+grid-template-columns: 205px minmax(0, 1fr); } .main-area {
+padding: 22px; } }
+@media (max-width: 760px) { .app-shell { display: block;
+} .sidebar { position: static;
+height: auto; padding: 14px; border-right: 0;
+border-bottom: 1px solid var(--line-color); } .sidebar-top {
+display: flex; align-items: center; justify-content: space-between;
+gap: 12px; } .sidebar-nav {
+display: flex; overflow-x: auto; gap: 6px;
+margin-top: 14px; padding-bottom: 2px; }
+.nav-button { width: auto; flex-shrink: 0;
+padding: 9px 12px; font-size: 13px; }
+.sidebar-bottom { display: none; }
+.main-area { padding: 17px; }
+.stat-card { min-height: 112px; padding: 14px;
+} } @media (max-width: 480px) {
+.main-area { padding: 12px; }
+.timer-ring { width: 190px; height: 190px;
+} .timer-digits { font-size: 36px;
+} .task-row { gap: 9px;
+} .task-actions { display: flex;
+flex-direction: column; gap: 5px; }
+} </style> </head>
+<body> <div class="app-shell"> <aside class="sidebar">
+<div class="sidebar-top"> <div class="flex items-center gap-3"> <div class="brand-mark">S</div>
+<div> <h1 class="text-lg font-extrabold tracking-tight">Study Planner</h1> <p class="text-xs muted">Plan smart. Study better.</p>
+</div> </div> </div>
+<nav class="sidebar-nav mt-9 space-y-2" aria-label="Main navigation"> <button class="nav-button active" data-view="dashboard"> <span>▦</span>
+<span>Dashboard</span> </button> <button class="nav-button" data-view="tasks">
+<span>☑</span> <span>My Tasks</span> </button>
+<button class="nav-button" data-view="focus"> <span>◷</span> <span>Focus Timer</span>
+</button> <button class="nav-button" data-view="notes"> <span>▤</span>
+<span>Study Notes</span> </button> <button class="nav-button" data-view="settings">
+<span>⚙</span> <span>Settings & Backup</span> </button>
+</nav> <div class="sidebar-bottom mt-12 rounded-2xl bg-indigo-50 p-4"> <p class="font-bold text-indigo-900">Small steps matter!</p>
+<p class="mt-2 text-sm text-indigo-700"> Finish one task at a time and keep moving forward. </p>
+</div> </aside> <main class="main-area">
+<header class="mb-7 flex flex-wrap items-center justify-between gap-4"> <div> <p id="todayLabel" class="mb-1 text-sm muted">Your study workspace</p>
+<h2 id="pageTitle" class="text-2xl font-extrabold md:text-3xl">Dashboard</h2> <p id="pageSubtitle" class="mt-1 text-sm muted"> Here is your study progress at a glance.
+</p> </div> <div class="flex flex-wrap items-center gap-2">
+<button id="themeButton" class="secondary-button" type="button"> ☾ Dark mode </button>
+<button id="headerAddButton" class="primary-button" type="button"> + Add task </button>
+</div> </header> <section id="dashboardView" class="view-section">
+<div class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4"> <article class="card stat-card"> <div class="flex items-center justify-between">
+<p class="text-sm muted">Total tasks</p> <span class="stat-icon bg-indigo-100 text-indigo-700">☷</span> </div>
+<p id="statTotal" class="mt-4 text-3xl font-extrabold">0</p> <p class="mt-1 text-xs muted">All your study goals</p> </article>
+<article class="card stat-card"> <div class="flex items-center justify-between"> <p class="text-sm muted">Completed</p>
+<span class="stat-icon bg-green-100 text-green-700">✓</span> </div> <p id="statCompleted" class="mt-4 text-3xl font-extrabold">0</p>
+<p class="mt-1 text-xs muted">Tasks finished</p> </article> <article class="card stat-card">
+<div class="flex items-center justify-between"> <p class="text-sm muted">Pending</p> <span class="stat-icon bg-amber-100 text-amber-700">◷</span>
+</div> <p id="statPending" class="mt-4 text-3xl font-extrabold">0</p> <p class="mt-1 text-xs muted">Still to do</p>
+</article> <article class="card stat-card"> <div class="flex items-center justify-between">
+<p class="text-sm muted">Overdue</p> <span class="stat-icon bg-rose-100 text-rose-700">!</span> </div>
+<p id="statOverdue" class="mt-4 text-3xl font-extrabold">0</p> <p class="mt-1 text-xs muted">Past-due tasks</p> </article>
+</div> <div class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3"> <section class="card p-5 xl:col-span-2">
+<div class="mb-4 flex items-center justify-between gap-3"> <div> <h3 class="section-heading mb-1">Today's focus</h3>
+<p class="text-sm muted">Your next steps for today.</p> </div> <button id="viewAllTasksButton" class="small-button" type="button">
+View all </button> </div>
+<div id="todayTasksList"></div> </section> <section class="card p-5">
+<h3 class="section-heading">Overall progress</h3> <div class="mb-3 flex items-end justify-between"> <p id="progressPercent" class="text-4xl font-extrabold">0%</p>
+<p class="text-sm muted">completed</p> </div> <div class="progress-track">
+<div id="progressBar" class="progress-fill"></div> </div> <p id="progressDescription" class="mt-3 text-sm muted">
+Add tasks to start tracking your progress. </p> <div class="mt-6 border-t pt-4" style="border-color: var(--line-color)">
+<div class="mb-2 flex justify-between text-sm"> <span class="muted">High priority pending</span> <strong id="highPriorityCount">0</strong>
+</div> <div class="mb-2 flex justify-between text-sm"> <span class="muted">Study notes</span>
+<strong id="noteCount">0</strong> </div> <div class="flex justify-between text-sm">
+<span class="muted">Focus sessions</span> <strong id="focusCount">0</strong> </div>
+</div> </section> </div>
+<div class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2"> <section class="card p-5"> <div class="mb-2">
+<h3 class="section-heading mb-1">Weekly activity</h3> <p class="text-sm muted">Tasks completed over the last seven days.</p> </div>
+<div id="weeklyChart" class="chart-bar"></div> </section> <section class="card p-5">
+<h3 class="section-heading">Upcoming deadlines</h3> <p class="mb-3 text-sm muted">Plan ahead and avoid last-minute work.</p> <div id="upcomingList"></div>
+</section> </div> </section>
+<section id="tasksView" class="view-section hidden-view"> <section class="card mb-5 p-5"> <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+<div> <h3 class="section-heading mb-1">Task manager</h3> <p class="text-sm muted">Create, organize and track your work.</p>
+</div> <button id="taskPageAddButton" class="primary-button" type="button"> + New task
+</button> </div> <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+<div> <label class="field-label" for="searchInput">Search tasks</label> <input id="searchInput" class="field" type="search"
+placeholder="Search by title or details"> </div> <div>
+<label class="field-label" for="statusFilter">Status</label> <select id="statusFilter" class="field"> <option value="all">All statuses</option>
+<option value="pending">Pending</option> <option value="completed">Completed</option> <option value="overdue">Overdue</opti
